@@ -41,7 +41,7 @@ class RBFKernel(Kernel):
 
     def eval(self, x, y):
         dist = torch.sum((x-y)**2)
-        return torch.exp(- dist / (2 * sigma^2))
+        return torch.exp(- dist / (2 * self.sigma**2))
 
 class SigmoidKernel(Kernel):
     def __init__(self, a=1, b=0):

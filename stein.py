@@ -1,6 +1,7 @@
 ### imports
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 plt.style.use("ggplot")
 
 import torch
@@ -23,7 +24,7 @@ def langevin_stein(p, phi, x):
     
     # repulsive term
     x_r = x.detach().requires_grad_()
-    phi_x = phi(x_r)
+    phi_x = phi(x_r).view(-1)
     phi_x.backward(torch.ones_like(x_r))
     r_term = torch.sum(x_r.grad)
     
@@ -47,26 +48,29 @@ class KSD:
                 return self.kernel.eval(x,y).view(-1)
             return k
         
-        def phi(x):
+        def phi_star(x):
             num_samples = samples.shape[0]
             phi_vals = torch.zeros(samples.shape)
+            print("poop")
             for i in range(num_samples):
                 sp = samples[i]
                 phi_vals[i] = langevin_stein(self.p, kern_curry(sp), x.view(-1))
+            print("jib")
             return torch.mean(phi_vals)
     
-        return phi
+        return phi_star
             
     def eval(self, q, num_samples=100):
         """
         Monte carlo estimate of KSD.
         """
         samples = q.sample((num_samples,))
-        phi = self.optimal_fn(q, samples)
+        phi_star = self.optimal_fn(q, samples)
         # get new samples for second expectation
         new_samples = q.sample((num_samples,))
         ksd_vals = torch.zeros(samples.shape)
         for i in tqdm(range(num_samples)):
             sp = new_samples[i]
-            ksd_vals[i] = langevin_stein(self.p, phi, sp.view(-1))
+            ksd_vals[i] = langevin_stein(self.p, phi_star, sp.view(-1))
+            print("vroom!")
         return torch.mean(ksd_vals)
