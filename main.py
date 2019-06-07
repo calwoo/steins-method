@@ -23,20 +23,10 @@ def langevin_stein_g(p, phi, x):
     implementation of the Langevin-Stein operator, which is an operator
     variational objective useful for SVGD.
     """
-    # attractive term
-    x_a = x.detach().requires_grad_()
-    log_prob = torch.log(p(x_a))
-    log_prob.backward()
-    print(x_a.grad)
-    a_term = torch.dot(phi(x_a).view(-1), x_a.grad)
-    
-    # repulsive term
-    x_r = x.detach().requires_grad_()
-    phi_x = phi(x_r).view(-1)
-    phi_x.backward(torch.ones_like(x_r))
-    r_term = torch.sum(x_r.grad)
-    
-    return a_term + r_term
+    def logp(x):
+        return torch.log(p(x))
+    nabla_logp = grad(logp(x), x, create_graph=True)[0]
+    return torch.dot(phi(x), nabla_logp) + grad(phi(x), x, create_graph=True)[0]
    
 """
 num_samples=10
@@ -74,7 +64,16 @@ def f(x):
     print(x.grad)
     return log_prob
 
-y = f(x)
-print(y)
+#y = f(x)
+#print(y)
+#y.backward()
+#print(x.grad)
+
+x_clone = x.clone()
+
+print(x, x_clone)
+
+y = x**2
 y.backward()
-print(x.grad)
+
+print(x.grad, x_clone.grad)
