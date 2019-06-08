@@ -33,7 +33,7 @@ class KSD:
         self.kernel = kernel
         self.p = p
         
-    def optimal_fn(self, q, samples):
+    def optimal_fn(self, samples):
         # python lacks true currying, so this is
         # going to be sorta awkward
         def kern_curry(y):
@@ -56,7 +56,7 @@ class KSD:
         Monte carlo estimate of KSD.
         """
         samples = q.sample((num_samples,))
-        phi_star = self.optimal_fn(q, samples)
+        phi_star = self.optimal_fn(samples)
         # get new samples for second expectation
         new_samples = q.sample((num_samples,))
         ksd_vals = torch.zeros(samples.shape)

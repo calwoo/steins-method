@@ -13,3 +13,16 @@ from stein.operators import *
 from stein.descent import *
 
 
+### get particles and descenter
+particles = torch.linspace(-2,2,steps=10).view(-1,1)
+rbf_kernel = RBFKernel(sigma=1.0)
+
+def p(x):
+    log_prob = torch.distributions.Normal(0,1).log_prob(x)
+    return torch.exp(log_prob)
+
+descent = SVGD(p, rbf_kernel)
+descent.seed(particles)
+
+### run descent
+print(descent.step())
