@@ -8,8 +8,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import grad
 
-from kernels import *
-from stein import *
+from stein.kernels import *
+from stein.operators import *
 
 
 def p(x):
