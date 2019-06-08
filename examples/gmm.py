@@ -19,6 +19,8 @@ from torch.autograd import grad
 
 from stein.kernels import *
 from stein.operators import *
+from stein.utils import *
+from stein.descent import SVGD
 
 
 ### data
@@ -29,7 +31,16 @@ def p(x):
     gauss2 = torch.exp(torch.distributions.Normal(0,1).log_prob(x))
     return 1.0/3 * gauss1 + 2.0/3 * gauss2
 
-y = p(x)
-y.backward()
+### get particles and descenter
+particles = torch.linspace(-2,2,steps=20, requires_grad=True).view(-1,1)
+rbf_kernel = RBFKernel(sigma=0.05)
+plot_dist(particles)
 
-print(x.grad)
+descent = SVGD(rbf_kernel, p)
+descent.seed(particles)
+
+# plot_dist(descent.particles)
+
+### run descent
+descent.train(lr=1e-2, epochs=100)
+plot_dist(descent.particles)

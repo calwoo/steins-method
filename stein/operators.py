@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import grad
 
+from stein.utils import *
 
 ### langevin-stein operator
 def langevin_stein(p, phi, x):
