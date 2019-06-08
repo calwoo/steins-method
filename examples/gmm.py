@@ -27,12 +27,12 @@ from stein.descent import SVGD
 x = torch.tensor([2.0], requires_grad=True)
 
 def p(x):
-    gauss1 = torch.exp(torch.distributions.Normal(0,1).log_prob(x))
-    gauss2 = torch.exp(torch.distributions.Normal(0,1).log_prob(x))
+    gauss1 = torch.exp(torch.distributions.Normal(-2,1).log_prob(x))
+    gauss2 = torch.exp(torch.distributions.Normal(2,1).log_prob(x))
     return 1.0/3 * gauss1 + 2.0/3 * gauss2
 
 ### get particles and descenter
-particles = torch.linspace(-2,2,steps=20, requires_grad=True).view(-1,1)
+particles = differentiable(torch.distributions.Normal(-10,1).sample((50,1)))
 rbf_kernel = RBFKernel(sigma=0.05)
 plot_dist(particles)
 
@@ -42,5 +42,5 @@ descent.seed(particles)
 # plot_dist(descent.particles)
 
 ### run descent
-descent.train(lr=1e-2, epochs=100)
+descent.train(lr=0.05, epochs=300)
 plot_dist(descent.particles)

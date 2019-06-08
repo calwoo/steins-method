@@ -20,8 +20,8 @@ def langevin_stein(p, phi, x):
     """
     def logp(y):
         return torch.log(p(y))
-    nabla_logp = grad(logp(x), x, create_graph=True)[0]
-    phi_x = phi(x).view(-1)
+    nabla_logp = grad(logp(x), x, create_graph=True, grad_outputs=torch.ones_like(x))[0]
+    phi_x = phi(x)
     return torch.dot(phi_x, nabla_logp) + grad(phi_x, x, create_graph=True)[0]
 
 ### Kernelized Stein discrepancy

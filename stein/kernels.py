@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+from stein.utils import timed
 
 class Kernel:
     """
@@ -40,7 +41,10 @@ class RBFKernel(Kernel):
         self.sigma = sigma
 
     def eval(self, x, y):
-        dist = torch.sum((x-y)**2)
+        dist = torch.zeros((x.shape[0], y.shape[0]))
+        for i in range(x.shape[0]):
+            for j in range(y.shape[0]):
+                dist[i,j] = torch.sum((x[i]-y[j])**2)
         return torch.exp(- dist / (2 * self.sigma**2))
 
 class SigmoidKernel(Kernel):
