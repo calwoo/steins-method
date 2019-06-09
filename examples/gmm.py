@@ -24,18 +24,15 @@ from stein.descent import SVGD
 
 
 ### data
-x = torch.tensor([2.0], requires_grad=True)
-
 def p(x):
-    gauss1 = torch.exp(torch.distributions.Normal(-5,1).log_prob(x))
-    gauss2 = torch.exp(torch.distributions.Normal(-8,1).log_prob(x))
+    gauss1 = torch.exp(torch.distributions.Normal(-2,1).log_prob(x))
+    gauss2 = torch.exp(torch.distributions.Normal(2,1).log_prob(x))
     return 1.0/3 * gauss1 + 2.0/3 * gauss2
-    #return gauss1
 
 ### get particles and descenter
-particles = differentiable(torch.distributions.Normal(-10,1).sample((150,1)))
-rbf_kernel = RBFKernel(sigma=20.0)
-plot_dist(p, particles)
+particles = differentiable(torch.distributions.Normal(-10,1).sample((200,1)))
+rbf_kernel = RBFKernel(sigma=1.0)
+#plot_dist(p, particles)
 
 descent = SVGD(rbf_kernel, p)
 descent.seed(particles)
@@ -51,5 +48,5 @@ grad_K = grad(K, particles, grad_outputs=torch.ones_like(K))
 # plot_dist(descent.particles)
 
 ### run descent
-descent.train(lr=0.5, epochs=500)
+descent.train(lr=0.5, epochs=500, gif=True)
 plot_dist(p, descent.particles)
