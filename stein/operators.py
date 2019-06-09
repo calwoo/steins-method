@@ -47,7 +47,7 @@ class KSD:
             K = self.kernel.eval(pcls, x)
             grad_logp = grad(self.logp(pcls), pcls, grad_outputs=torch.ones_like(self.logp(pcls)))[0]
             term1 = torch.mm(K, grad_logp)
-            term2 = torch.sum(grad(K, pcls, grad_outputs=torch.ones_like(K))[0], 1, keepdim=True)
+            term2 = -torch.sum(grad(K, pcls, grad_outputs=torch.ones_like(K))[0], 1, keepdim=True)
             return (term1 + term2) / particles.shape[0]
     
         return phi_star

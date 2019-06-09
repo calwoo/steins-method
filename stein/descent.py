@@ -58,10 +58,17 @@ class SVGD:
         new_particles = self.particles + lr * flow
         self.seed(new_particles)
 
-    def train(self, lr=1e-2, epochs=10):
+    def train(self, lr=1e-2, epochs=10, gif=False):
         """
         Perform Stein variational gradient descent on
         set of initial particles.
         """
-        for _ in tqdm(range(epochs)):
+        image_filenames = []
+        for ep in tqdm(range(epochs)):
+            if ep % 50 == 0 and gif:
+                plot_dist(self.p, self.particles, save=True, idx=ep)
+                image_filenames.append("{}.png".format(ep))
             self.step(lr=lr)
+
+        if gif:
+            create_gif("imgs", image_filenames)
