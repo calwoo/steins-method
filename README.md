@@ -9,4 +9,4 @@ This contains implementations of the following papers:
 
 [Q. Liu] Stein variational gradient descent as gradient flow -- arXiv:1704.07520v2
 
-!(gmm-svgd.gif)
+![svgd](gmm-svgd.gif)
