@@ -17,6 +17,8 @@ def langevin_stein(p, phi, x):
     """
     implementation of the Langevin-Stein operator, which is an operator
     variational objective useful for SVGD.
+
+    BROKEN -- FIX!?
     """
     def logp(y):
         return torch.log(p(y))
