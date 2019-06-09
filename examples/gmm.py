@@ -27,20 +27,29 @@ from stein.descent import SVGD
 x = torch.tensor([2.0], requires_grad=True)
 
 def p(x):
-    gauss1 = torch.exp(torch.distributions.Normal(-2,1).log_prob(x))
-    gauss2 = torch.exp(torch.distributions.Normal(2,1).log_prob(x))
+    gauss1 = torch.exp(torch.distributions.Normal(-5,1).log_prob(x))
+    gauss2 = torch.exp(torch.distributions.Normal(-8,1).log_prob(x))
     return 1.0/3 * gauss1 + 2.0/3 * gauss2
+    #return gauss1
 
 ### get particles and descenter
-particles = differentiable(torch.distributions.Normal(-10,1).sample((50,1)))
-rbf_kernel = RBFKernel(sigma=0.05)
-plot_dist(particles)
+particles = differentiable(torch.distributions.Normal(-10,1).sample((150,1)))
+rbf_kernel = RBFKernel(sigma=20.0)
+plot_dist(p, particles)
 
 descent = SVGD(rbf_kernel, p)
 descent.seed(particles)
 
+"""
+other_pcls = differentiable(particles)
+K = rbf_kernel.eval(particles, other_pcls)
+logp_pcls = descent.KSD.logp(particles)
+grad_logp = grad(logp_pcls, particles, grad_outputs=torch.ones_like(logp_pcls))
+grad_K = grad(K, particles, grad_outputs=torch.ones_like(K))
+
+"""
 # plot_dist(descent.particles)
 
 ### run descent
-descent.train(lr=0.05, epochs=300)
-plot_dist(descent.particles)
+descent.train(lr=0.5, epochs=500)
+plot_dist(p, descent.particles)

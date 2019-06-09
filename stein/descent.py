@@ -42,6 +42,7 @@ class SVGD:
         self.phi = self.KSD.optimal_fn(particles)
 
     def step(self, lr=1e-2):
+        """
         new_particles = torch.zeros_like(self.particles)
         for i in range(self.num_particles):
             # get current particle
@@ -51,6 +52,10 @@ class SVGD:
             # gradient descent!
             new_particles[i] = particle + lr * flow
         # update
+        self.seed(new_particles)
+        """
+        flow = self.phi(self.particles)
+        new_particles = self.particles + lr * flow
         self.seed(new_particles)
 
     def train(self, lr=1e-2, epochs=10):

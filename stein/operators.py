@@ -22,7 +22,7 @@ def langevin_stein(p, phi, x):
         return torch.log(p(y))
     nabla_logp = grad(logp(x), x, create_graph=True, grad_outputs=torch.ones_like(x))[0]
     phi_x = phi(x)
-    return torch.dot(phi_x, nabla_logp) + grad(phi_x, x, create_graph=True)[0]
+    return torch.mm(phi_x, nabla_logp) + grad(phi_x, x, create_graph=True)[0]
 
 ### Kernelized Stein discrepancy
 class KSD:
@@ -33,22 +33,22 @@ class KSD:
     def __init__(self, kernel, p):
         self.kernel = kernel
         self.p = p
+
+    def logp(self, x):
+        return torch.log(self.p(x))
         
-    def optimal_fn(self, samples):
-        # python lacks true currying, so this is
-        # going to be sorta awkward
-        def kern_curry(y):
-            def k(x):
-                return self.kernel.eval(x,y).view(-1)
-            return k
-        
+    def optimal_fn(self, particles):
+        """
+        Computes the optimal function for kernelized Stein
+        discrepancy given kernel of RKHS.
+        """
+        pcls = differentiable(particles)
         def phi_star(x):
-            num_samples = samples.shape[0]
-            phi_vals = torch.zeros(samples.shape)
-            for i in range(num_samples):
-                sp = samples[i].clone().detach().requires_grad_()
-                phi_vals[i] = langevin_stein(self.p, kern_curry(sp), x.view(-1))
-            return torch.mean(phi_vals)
+            K = self.kernel.eval(pcls, x)
+            grad_logp = grad(self.logp(pcls), pcls, grad_outputs=torch.ones_like(self.logp(pcls)))[0]
+            term1 = torch.mm(K, grad_logp)
+            term2 = torch.sum(grad(K, pcls, grad_outputs=torch.ones_like(K))[0], 1, keepdim=True)
+            return (term1 + term2) / particles.shape[0]
     
         return phi_star
             

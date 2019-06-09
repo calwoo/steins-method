@@ -14,10 +14,13 @@ import torch
 """
 Visualization functions.
 """
-def plot_dist(particles, bins=30):
+def plot_dist(p, particles, bins=30):
     # convert to numpy
     pcls = particles.detach().numpy()
-    sns.distplot(pcls, hist=True, kde=True, bins=bins)
+    sns.distplot(pcls, hist=True, kde=True, bins=bins, norm_hist=True)
+    # plot density
+    xs = np.linspace(-15,0,1000)
+    plt.plot(xs, p(torch.tensor(xs)).detach().numpy())
     plt.show()
 
 

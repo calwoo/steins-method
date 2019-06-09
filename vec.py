@@ -42,17 +42,17 @@ ksd = KSD(rbf, p)
 phi = ksd.optimal_fn(particles)
 # print(langevin_stein(p, phi, particles[0]))
 
-"""
+
 def ls(logp, kernel, particles):
-    K = kernel.eval(particles, particles)
+    pcl_copy = differentiable(particles)
+    K = kernel.eval(pcl_copy, particles)
     grad_logp = grad(logp(particles), particles, grad_outputs=torch.ones_like(particles))[0]
     term1 = torch.mm(K, grad_logp)
-    return term1
+    term2 = torch.sum(grad(K, pcl_copy, create_graph=True, grad_outputs=torch.ones_like(particles))[0], 1)
+    return (term1 + term2) / particles.shape[0]
 
-print(ls(logp, rbf, particles))
-"""
-
-print(rbf.eval(particles, particles))
+# print(ls(logp, rbf, particles))
+print(phi(particles))
 
 ### vectorized langevin-stein
 

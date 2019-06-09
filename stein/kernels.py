@@ -10,6 +10,14 @@ class Kernel:
     def eval(self, x, y):
         pass
 
+    def sq_dists(self, X, Y):
+        """
+        completely vectorized squared-dist function in pytorch
+        """
+        dists = torch.sum(X**2, 1).unsqueeze(-1) + torch.sum(Y**2, 1) -\
+            2*torch.mm(X, Y.t())
+        return dists
+
 class FeatureKernel(Kernel):
     """create kernel from feature map"""
     def __init__(self, feature_map=None):
@@ -41,10 +49,7 @@ class RBFKernel(Kernel):
         self.sigma = sigma
 
     def eval(self, x, y):
-        dist = torch.zeros((x.shape[0], y.shape[0]))
-        for i in range(x.shape[0]):
-            for j in range(y.shape[0]):
-                dist[i,j] = torch.sum((x[i]-y[j])**2)
+        dist = self.sq_dists(x, y)
         return torch.exp(- dist / (2 * self.sigma**2))
 
 class SigmoidKernel(Kernel):
